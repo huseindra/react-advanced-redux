@@ -1,9 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { showNotification } from "./ui-slice";
 
 const initialCartState = {
     items: [],
-    totalQuantity : 0
+    totalQuantity : 0,
+    change: false
 }
 
 const cartSlice = createSlice({
@@ -18,6 +18,7 @@ const cartSlice = createSlice({
             const newItem = action.payload
             const existingItem = state.items.find(item => item.id === newItem.id)
             state.totalQuantity++
+            state.changed = true
             if(!existingItem){
                 state.items.push({
                     id: newItem.id,
@@ -37,6 +38,7 @@ const cartSlice = createSlice({
             const id = action.payload
             const existingItem = state.items.find(item => item.id === id)
             state.totalQuantity--
+            state.changed = true
             if(existingItem.quantity === 1){
                 state.items = state.items.filter(item => item.id !== id)
             }else {
@@ -47,43 +49,6 @@ const cartSlice = createSlice({
     }
 
 })
-
-
-export const sendDataCart = (cart) => {
-    return async (dispatch)=>{
-        dispatch(showNotification({
-          status: 'pending',
-          title: 'Pending!',
-          message: 'Sending data is on going...'
-        }))
-  
-       const sendRequest = async() => {
-        const response =  await fetch('https://react-mini-tasks-default-rtdb.asia-southeast1.firebasedatabase.app/cart.json',{
-            method: 'PUT',
-            body: JSON.stringify(cart)
-          })
-    
-          if(!response.ok){
-           throw new Error('Sending data is failed')
-          }
-       }
-       try {
-           await sendRequest()
-           dispatch(showNotification({
-            status: 'success',
-            title: 'Success!',
-            message: 'Sending data is successfuly...'
-          }))
-       } catch (error) {
-            dispatch(showNotification({
-                status: 'error',
-                title: 'Failed!',
-                message: 'Sending data is error...'
-            }))
-       }
-        
-      }
-}
 
 export const {replaceItemToCart, addItemToCart, removeItemToCart} = cartSlice.actions
 export default cartSlice.reducer
